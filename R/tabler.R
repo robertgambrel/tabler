@@ -10,10 +10,14 @@
 #' @param cutoffs Levels of significance to display stars for, in descending
 #'   order
 #' @param stars Choices for displayed stars
+#' @param intercept_last If true, move intercept to end of output
 #' @param file Optional: output the file as a csv
 #' @return A dataset of merged output, sorted nicely
 #'
-#'
+#' @import dplyr
+#' @import tidyr
+#' @import broom
+#' @import magrittr
 #'
 tabler <- function(model_list,
                    teststat = 'p.value',
