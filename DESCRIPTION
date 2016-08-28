@@ -3,9 +3,9 @@ Type: Package
 Title: Make Publication Tables from Multiple Model Results
 Version: 0.1.0
 Authors@R: person("Robert", "Gambrel", email = "robert.gambrel@gmail.com", role = c("aut", "cre"))
-Description: This is a wrapper to combine multiple tidy modeling outputs (created
-    by broom tidying). It merges coefficient data and fit statistics into
-    neatly arranged tables, with shared variables appearing on top and fit
+Description: This is a wrapper to combine multiple tidy modeling outputs
+    (created by broom tidying). It merges coefficient data and fit statistics
+    into neatly arranged tables, with shared variables appearing on top and fit
     statistics on the bottom.
 License: MIT + file LICENSE
 LazyData: TRUE
@@ -16,3 +16,4 @@ Imports:
     tidyr (>= 0.6.0)
 URL: http://www.github.com/robertgambrel/tabler
 BugReports: http://www.github.com/robertgambrel/tabler/issues
+RoxygenNote: 5.0.1
