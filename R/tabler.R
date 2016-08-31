@@ -27,7 +27,7 @@ tabler <- function(model_list,
                    cutoffs = c(0.1, 0.05, 0.01),
                    stars = c('*', '**', '***'),
                    intercept_last = T,
-                   save = F) {
+                   file = F) {
 
   # check that each part of list is a model summary. They follow regular
   # patterns in class type
@@ -63,9 +63,18 @@ tabler <- function(model_list,
   # make significance key
   sig_key = paste(paste0(paste0('p<', cutoffs, ': '), stars), collapse = ' ')
 
-  sig_row = c(sig_key, rep(NA, ncol(base) - 1))
+  sig_row = c(sig_key, NA, rep(NA_character_, ncol(base) - 2))
 
-  final <- rbind(base, sig_row)
+  final <- list(base, sig_key)
+
+  if (file != F) {
+    if (!grepl('.csv', file)) {
+      stop("File must be a csv output. Please include '.csv' in the file argument.")
+    } else {
+      output <- rbind(base, sig_row)
+      write.csv(output, file, na = '')
+    }
+  }
 
   return(final)
 
