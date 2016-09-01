@@ -27,7 +27,7 @@ tabler <- function(model_list,
                    cutoffs = c(0.1, 0.05, 0.01),
                    stars = c('*', '**', '***'),
                    intercept_last = T,
-                   file = F) {
+                   file = NULL) {
 
   # check that each part of list is a model summary. They follow regular
   # patterns in class type
@@ -67,7 +67,7 @@ tabler <- function(model_list,
 
   final <- list(base, sig_key)
 
-  if (file != F) {
+  if (!is.null(file)) {
     if (!grepl('.csv', file)) {
       stop("File must be a csv output. Please include '.csv' in the file argument.")
     } else {
