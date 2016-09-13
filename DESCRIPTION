@@ -17,7 +17,10 @@ Imports:
     lazyeval (>= 0.2.0)
 Suggests:
     WriteXLS (>= 4.0.0),
-    testthat
+    testthat,
+    knitr,
+    rmarkdown
 URL: http://www.github.com/robertgambrel/tabler
 BugReports: http://www.github.com/robertgambrel/tabler/issues
 RoxygenNote: 5.0.1
+VignetteBuilder: knitr
