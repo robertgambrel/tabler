@@ -1,15 +1,10 @@
 #' Convert a model output to a dataframe
 #'
-#' @param model A model output object
-#' @param teststat Which test statistic to show ('std.error' standard error, 'p.value' p
-#'   value, 'statistic' model-specific statistic, \code{NA} for none)
-#' @param digits The number of digits to display
-#' @param digits_coef Override for digits for coefficient
-#' @param digits_teststat Override for digits for test statistic
-#' @param cutoffs Levels of significance to display stars for, in descending
-#'   order
-#' @param stars Choices for displayed stars
-#' @return The data formatted into a dataframe, ready to merge with other models
+#' This takes each model used in the final table and converts it to a tidy
+#' dataset, formatted and ready to be merged with others in a nice table.
+#'
+#' @inheritParams esttab
+#' @param model A single model result
 #'
 #' @importFrom magrittr %>%
 #'
@@ -22,7 +17,8 @@ convert_to_data <- function(model,
                             digits_teststat = digits,
                             cutoffs = c(0.1, 0.05, 0.01),
                             stars = c('*', '**', '***'),
-                            N = T) {
+                            N = T,
+                            fit = NULL) {
 
   if (length(stars) != length(cutoffs)) {
     stop("Cutoff values for significance and significance signifiers (stars)
@@ -74,6 +70,16 @@ convert_to_data <- function(model,
     cleaned_long <- rbind(cleaned_long, c("N", "", n_obs))
   }
 
+  # add fit stats if they're requested
+  if (!is.null(fit)) {
+    if (!fit %in% names(summary(model))) {
+      stop(paste0("Error with fit statistic ", fit,
+                  ". No statistic by that name found in model ",
+                  deparse(substitute(model)), "."))
+    }
+    model_fit <- round(summary(model)[fit][[1]], digits_teststat)
+    cleaned_long <- rbind(cleaned_long, c(fit, '', model_fit))
+  }
   return(cleaned_long)
 }
 

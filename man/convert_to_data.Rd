@@ -6,13 +6,14 @@
 \usage{
 convert_to_data(model, teststat = "std.error", digits = 3,
   digits_coef = digits, digits_teststat = digits, cutoffs = c(0.1, 0.05,
-  0.01), stars = c("*", "**", "***"), N = T)
+  0.01), stars = c("*", "**", "***"), N = T, fit = NULL)
 }
 \arguments{
-\item{model}{A model output object}
+\item{model}{A single model result}
 
-\item{teststat}{Which test statistic to show ('std.error' standard error, 'p.value' p
-value, 'statistic' model-specific statistic, \code{NA} for none)}
+\item{teststat}{Which test statistic to show ('std.error' standard error,
+'p.value' p value, 'statistic' model-specific statistic, \code{NA} for
+none)}
 
 \item{digits}{The number of digits to display}
 
@@ -25,10 +26,8 @@ order}
 
 \item{stars}{Choices for displayed stars}
 }
-\value{
-The data formatted into a dataframe, ready to merge with other models
-}
 \description{
-Convert a model output to a dataframe
+This takes each model used in the final table and converts it to a tidy
+dataset, formatted and ready to be merged with others in a nice table.
 }
 

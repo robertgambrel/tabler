@@ -17,7 +17,7 @@
 
 
 
-tabler <- function(...,
+esttab <- function(...,
                    teststat = 'p.value',
                    digits = 3,
                    digits_coef = digits,
@@ -26,6 +26,7 @@ tabler <- function(...,
                    stars = c('*', '**', '***'),
                    intercept_last = T,
                    N = T,
+                   fit = NULL,
                    file = NULL) {
 
   # check that each part of list is a model summary. They follow regular
@@ -40,11 +41,11 @@ tabler <- function(...,
 
   # convert each model to a long form, and merge them
   base <- convert_to_data(model_list[[1]], teststat, digits, digits_coef, digits_teststat,
-                         cutoffs, stars, N)
+                         cutoffs, stars, N, fit)
   if (length(model_list) >= 2) {
     for (model in model_list[2:length(model_list)]) {
       temp <- convert_to_data(model, teststat, digits, digits_coef, digits_teststat,
-                               cutoffs, stars)
+                               cutoffs, stars, N, fit)
       base <- merge(base, temp, by = c('term', 'type'), all = T)
     }
   }
@@ -52,7 +53,7 @@ tabler <- function(...,
   names(base) <- c("Variable", "Result", paste0("Model ", 1:(length(names(base))-2)))
 
   base <- base %>%
-    mutate(
+    dplyr::mutate(
       Result = ifelse(Result == "displayed_estimate", "Coefficient", Result),
       Result = ifelse(Result == "displayed_stat", teststat, Result)
     )
@@ -60,11 +61,22 @@ tabler <- function(...,
   # if intercept last, move intercept to bottom of the coefficient list, but
   # keep N last
   if (intercept_last) {
-    if (!N) {
-      base <- base[c(3:nrow(base), 1:2), ]
-    } else {
-      base <- base[c(3:(nrow(base)-1), 1:2, nrow(base)), ]
-
+    base <- base[c(3:nrow(base), 1:2), ]
+    # if N was reported, move that last
+    if (N) {
+      base_1 <- base %>%
+        dplyr::filter(Variable != "N")
+      base_2 <- base %>%
+        dplyr::filter(Variable == "N")
+      base <- rbind(base_1, base_2)
+    }
+    # if fit stat was requested
+    if (!is.null(fit)) {
+      base_3 <- base %>%
+        dplyr::filter(Variable != fit)
+      base_4 <- base %>%
+        dplyr::filter(Variable == fit)
+      base <- rbind(base_3, base_4)
     }
 
   }
