@@ -58,8 +58,21 @@ esttab <- function(...,
       Result = ifelse(Result == "displayed_stat", teststat, Result)
     )
 
+  # if there were any overall fit stats (r-squared etc.) move them to the bottom
+  if (!is.null(fit)) {
+    base_nonfit <- base %>%
+      dplyr::filter(
+        !Variable %in% fit
+      )
+    base_fit <- base %>%
+      dplyr::filter(
+        Variable %in% fit
+      )
+    base <- rbind(base_nonfit, base_fit)
+  }
+
   # if intercept last, move intercept to bottom of the coefficient list, but
-  # keep N last
+  # keep N and model fit stats last
   if (intercept_last) {
     base <- base[c(3:nrow(base), 1:2), ]
     # if N was reported, move that last
@@ -72,11 +85,13 @@ esttab <- function(...,
     }
     # if fit stat was requested
     if (!is.null(fit)) {
-      base_3 <- base %>%
-        dplyr::filter(Variable != fit)
-      base_4 <- base %>%
-        dplyr::filter(Variable == fit)
-      base <- rbind(base_3, base_4)
+      for (stat in fit) {
+        base_3 <- base %>%
+          dplyr::filter(Variable != stat)
+        base_4 <- base %>%
+          dplyr::filter(Variable == stat)
+        base <- rbind(base_3, base_4)
+      }
     }
 
   }

@@ -72,13 +72,15 @@ convert_to_data <- function(model,
 
   # add fit stats if they're requested
   if (!is.null(fit)) {
-    if (!fit %in% names(summary(model))) {
-      stop(paste0("Error with fit statistic ", fit,
-                  ". No statistic by that name found in model ",
-                  deparse(substitute(model)), "."))
+    for (stat in fit) {
+      if (!stat %in% names(summary(model))) {
+        stop(paste0("Error with fit statistic ", stat,
+                    ". No statistic by that name found in model ",
+                    deparse(substitute(model)), "."))
+      }
+      model_fit <- round(summary(model)[stat][[1]], digits_teststat)
+      cleaned_long <- rbind(cleaned_long, c(stat, '', model_fit))
     }
-    model_fit <- round(summary(model)[fit][[1]], digits_teststat)
-    cleaned_long <- rbind(cleaned_long, c(fit, '', model_fit))
   }
   return(cleaned_long)
 }
