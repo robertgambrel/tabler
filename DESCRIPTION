@@ -13,9 +13,11 @@ Imports:
     broom (>= 0.4.1),
     dplyr (>= 0.5.0),
     magrittr (>= 1.5),
-    tidyr (>= 0.6.0)
+    tidyr (>= 0.6.0),
+    lazyeval (>= 0.2.0)
 Suggests:
-    WriteXLS (>= 4.0.0)
+    WriteXLS (>= 4.0.0),
+    testthat
 URL: http://www.github.com/robertgambrel/tabler
 BugReports: http://www.github.com/robertgambrel/tabler/issues
 RoxygenNote: 5.0.1
