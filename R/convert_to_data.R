@@ -46,6 +46,11 @@ convert_to_data <- function(model,
     )
 
   # add test statistic, requires standard evaluation from dplyr
+
+  if (!teststat %in% names(cleaned)) {
+    stop(paste0("Test statistic ", teststat, " not available. Please select from ",
+                paste(names(cleaned)[3:ncol(cleaned)], collapse = ", ")))
+  }
   if (is.na(teststat)) {
     NULL
   } else {
