@@ -14,6 +14,8 @@ Imports:
     dplyr (>= 0.5.0),
     magrittr (>= 1.5),
     tidyr (>= 0.6.0)
+Suggests:
+    WriteXLS (>= 4.0.0)
 URL: http://www.github.com/robertgambrel/tabler
 BugReports: http://www.github.com/robertgambrel/tabler/issues
 RoxygenNote: 5.0.1
