@@ -11,6 +11,8 @@
 #' @param stars Choices for displayed stars
 #' @return The data formatted into a dataframe, ready to merge with other models
 #'
+#' @importFrom magrittr %>%
+#'
 #' @export
 
 convert_to_data <- function(model,
@@ -34,17 +36,17 @@ convert_to_data <- function(model,
   }
 
   # use broom to tidy the model
-  cleaned <- tidy(model)
+  cleaned <- broom::tidy(model)
 
   # assign stars based on cutoffs
   for (i in 1:length(cutoffs)) {
-    cleaned <- cleaned %>%
-      mutate(
+    cleaned <-
+      dplyr::mutate(cleaned,
         displayed_stars = ifelse(p.value < cutoffs[i], stars[i], '')
       )
   }
-  cleaned <- cleaned %>%
-    mutate(
+  cleaned <-
+    dplyr::mutate(cleaned,
       displayed_estimate = paste0(round(estimate, digits_coef), displayed_stars)
     )
 
@@ -52,8 +54,7 @@ convert_to_data <- function(model,
   if (is.na(teststat)) {
     NULL
   } else {
-    cleaned <- cleaned %>%
-      mutate_(
+    cleaned <- dplyr::`mutate_`(cleaned,
         displayed_stat = lazyeval::interp(~round(var, digits_teststat),
                                           var = as.name(teststat))
         )
@@ -63,9 +64,9 @@ convert_to_data <- function(model,
 
   # convert to long form for merging
   cleaned_long <- cleaned %>%
-    select(term, displayed_estimate, displayed_stat) %>%
-    gather(type, value, 2:3) %>%
-    arrange(term, type)
+    dplyr::select(term, displayed_estimate, displayed_stat) %>%
+    tidyr::gather(type, value, 2:3) %>%
+    dplyr::arrange(term, type)
 
   # add number of observations if desired
   if (N) {
