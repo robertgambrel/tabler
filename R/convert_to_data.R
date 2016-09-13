@@ -8,7 +8,6 @@
 #'
 #' @importFrom magrittr %>%
 #'
-#' @export
 
 convert_to_data <- function(model,
                             teststat = 'std.error',

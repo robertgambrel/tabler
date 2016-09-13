@@ -1,5 +1,9 @@
 #' Convert a set of model outputs to a nice table
 #'
+#' @importFrom utils write.csv
+#'
+#' @export
+#'
 #' @param ... A model objects
 #' @param teststat Which test statistic to show ('std.error' standard error,
 #'   'p.value' p value, 'statistic' model-specific statistic, \code{NA} for
@@ -11,6 +15,8 @@
 #'   order
 #' @param stars Choices for displayed stars
 #' @param intercept_last If true, move intercept to end of output
+#' @param N whether or not to display observation count for the model
+#' @param fit an optional list of model fit statistics (i.e. c("r.squared", "adj.r.squared"))
 #' @param file Optional: output the file as a csv
 #' @return A dataset of merged output, sorted nicely
 #'
@@ -104,12 +110,20 @@ esttab <- function(...,
   final <- list(base, sig_key)
 
   if (!is.null(file)) {
-    if (!grepl('.csv', file)) {
-      stop("File must be a csv output. Please include '.csv' in the file argument.")
-    } else {
+    if (!grepl('.csv|.xls', file)) {
+      stop("File must be a csv, xls, or xlsx output. Please include the appropriate file .type in the file argument.")
+    } else if (grepl('.csv', file)) {
       output <- rbind(base, sig_row)
       write.csv(output, file, na = '')
+    } else if (grepl('.xls', file)) {
+      if (!requireNamespace("WriteXLS", quietly = TRUE)) {
+        stop("Pkg WriteXLS needed to write xls / xlsx files. Please install it or switch to csv output.",
+             call. = FALSE)
+      }
+      output <- rbind(base, sig_row)
+      WriteXLS::WriteXLS("output", ExcelFileName = file)
     }
+
   }
 
   return(final)

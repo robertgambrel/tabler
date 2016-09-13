@@ -28,6 +28,10 @@ order}
 
 \item{intercept_last}{If true, move intercept to end of output}
 
+\item{N}{whether or not to display observation count for the model}
+
+\item{fit}{an optional list of model fit statistics (i.e. c("r.squared", "adj.r.squared"))}
+
 \item{file}{Optional: output the file as a csv}
 }
 \value{

@@ -25,6 +25,10 @@ none)}
 order}
 
 \item{stars}{Choices for displayed stars}
+
+\item{N}{whether or not to display observation count for the model}
+
+\item{fit}{an optional list of model fit statistics (i.e. c("r.squared", "adj.r.squared"))}
 }
 \description{
 This takes each model used in the final table and converts it to a tidy
