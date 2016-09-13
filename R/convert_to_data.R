@@ -10,6 +10,8 @@
 #'   order
 #' @param stars Choices for displayed stars
 #' @return The data formatted into a dataframe, ready to merge with other models
+#'
+#' @export
 
 convert_to_data <- function(model,
                             teststat = 'std.error',
@@ -17,14 +19,15 @@ convert_to_data <- function(model,
                             digits_coef = digits,
                             digits_teststat = digits,
                             cutoffs = c(0.1, 0.05, 0.01),
-                            stars = c('*', '**', '***')) {
+                            stars = c('*', '**', '***'),
+                            N = T) {
 
   if (length(stars) != length(cutoffs)) {
     stop("Cutoff values for significance and significance signifiers (stars)
          must have the same length.")
   }
 
-  if (sum(cutoffs == sort(cutoffs, decreasing = T)) != length(cutoffs)) {
+  if (!all.equal(cutoffs, sort(cutoffs, decreasing = T))) {
     stop(paste0("Please enter cutoff values in descending order (i.e. c(",
                 paste(sort(cutoffs, decreasing = T), collapse = ', '), ")) and
                 verify that the order of the stars are as intended."))
@@ -48,7 +51,7 @@ convert_to_data <- function(model,
   # add test statistic, requires standard evaluation from dplyr
   if (is.na(teststat)) {
     NULL
-  } else{
+  } else {
     cleaned <- cleaned %>%
       mutate_(
         displayed_stat = lazyeval::interp(~round(var, digits_teststat),
@@ -56,11 +59,19 @@ convert_to_data <- function(model,
         )
   }
 
+
+
   # convert to long form for merging
   cleaned_long <- cleaned %>%
     select(term, displayed_estimate, displayed_stat) %>%
     gather(type, value, 2:3) %>%
     arrange(term, type)
+
+  # add number of observations if desired
+  if (N) {
+    n_obs <- length(model$residuals)
+    cleaned_long <- rbind(cleaned_long, c("N", "", n_obs))
+  }
 
   return(cleaned_long)
 }
