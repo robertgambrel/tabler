@@ -4,12 +4,12 @@
 \alias{tabler}
 \title{Convert a set of model outputs to a nice table}
 \usage{
-tabler(model_list, teststat = "p.value", digits = 3, digits_coef = digits,
+tabler(..., teststat = "p.value", digits = 3, digits_coef = digits,
   digits_teststat = digits, cutoffs = c(0.1, 0.05, 0.01), stars = c("*",
-  "**", "***"), intercept_last = T, save = F)
+  "**", "***"), intercept_last = T, N = T, file = NULL)
 }
 \arguments{
-\item{model_list}{Names of a set of model object}
+\item{...}{A model objects}
 
 \item{teststat}{Which test statistic to show ('std.error' standard error,
 'p.value' p value, 'statistic' model-specific statistic, \code{NA} for

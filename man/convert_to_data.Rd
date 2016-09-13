@@ -6,7 +6,7 @@
 \usage{
 convert_to_data(model, teststat = "std.error", digits = 3,
   digits_coef = digits, digits_teststat = digits, cutoffs = c(0.1, 0.05,
-  0.01), stars = c("*", "**", "***"))
+  0.01), stars = c("*", "**", "***"), N = T)
 }
 \arguments{
 \item{model}{A model output object}

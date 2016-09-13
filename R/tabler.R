@@ -1,6 +1,6 @@
 #' Convert a set of model outputs to a nice table
 #'
-#' @param model_list Names of a set of model object
+#' @param ... A model objects
 #' @param teststat Which test statistic to show ('std.error' standard error,
 #'   'p.value' p value, 'statistic' model-specific statistic, \code{NA} for
 #'   none)
@@ -18,8 +18,9 @@
 #' @import tidyr
 #' @import broom
 #' @import magrittr
-#'
-tabler <- function(model_list,
+
+
+tabler <- function(...,
                    teststat = 'p.value',
                    digits = 3,
                    digits_coef = digits,
@@ -27,24 +28,28 @@ tabler <- function(model_list,
                    cutoffs = c(0.1, 0.05, 0.01),
                    stars = c('*', '**', '***'),
                    intercept_last = T,
+                   N = T,
                    file = NULL) {
 
   # check that each part of list is a model summary. They follow regular
   # patterns in class type
+  model_list <- list(...)
   for (model in model_list) {
-    print(class(summary(model)))
+    #print(class(summary(model)))
     if (!grepl("summary[[:punct:]]", paste(class(summary(model)), collapse = ''))) {
-      stop("Tried to convert a non-model object. Be sure model list is of type list() and not c().")
+      stop("Tried to convert a non-model object. Be sure inputs are model outputs.")
     }
   }
 
   # convert each model to a long form, and merge them
   base <- convert_to_data(model_list[[1]], teststat, digits, digits_coef, digits_teststat,
-                         cutoffs, stars)
-  for (model in model_list[2:length(model_list)]) {
-    temp <- convert_to_data(model, teststat, digits, digits_coef, digits_teststat,
-                             cutoffs, stars)
-    base <- merge(base, temp, by = c('term', 'type'), all = T)
+                         cutoffs, stars, N)
+  if (length(model_list) >= 2) {
+    for (model in model_list[2:length(model_list)]) {
+      temp <- convert_to_data(model, teststat, digits, digits_coef, digits_teststat,
+                               cutoffs, stars)
+      base <- merge(base, temp, by = c('term', 'type'), all = T)
+    }
   }
 
   names(base) <- c("Variable", "Result", paste0("Model ", 1:(length(names(base))-2)))
@@ -55,9 +60,16 @@ tabler <- function(model_list,
       Result = ifelse(Result == "displayed_stat", teststat, Result)
     )
 
-  # if intercept last, move intercept to bottom of the table
+  # if intercept last, move intercept to bottom of the coefficient list, but
+  # keep N last
   if (intercept_last) {
-    base <- base[c(3:nrow(base), 1:2), ]
+    if (!N) {
+      base <- base[c(3:nrow(base), 1:2), ]
+    } else {
+      base <- base[c(3:(nrow(base)-1), 1:2, nrow(base)), ]
+
+    }
+
   }
 
   # make significance key
@@ -79,3 +91,4 @@ tabler <- function(model_list,
   return(final)
 
 }
+
