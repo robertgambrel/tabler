@@ -4,7 +4,7 @@
 \alias{convert_to_data}
 \title{Convert a model output to a dataframe}
 \usage{
-convert_to_data(model, teststat = "std.error", digits = 3,
+convert_to_data(model, teststat = "p.value", digits = 3,
   digits_coef = digits, digits_teststat = digits, cutoffs = c(0.1, 0.05,
   0.01), stars = c("*", "**", "***"), N = T, fit = NULL)
 }
