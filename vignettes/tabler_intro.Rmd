@@ -9,50 +9,89 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+This vignette will show a few examples of how to use this package and alter what
+is output. It will also highlight some restrictions on formats that the user can
+request.
 
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+## Default values
 
-## Vignette Info
+The main function used from this package is `tablify`. This function accepts a 
+series of model output objects as its main arguments, converts the outputs to 
+dataset columns (using the `tidy` function from the `broom` package), and then
+outputs two objects:
 
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+  - A cleaned dataset where each column contains one model and each row contains
+  regression results
+  - A string caption that explains the values of significance stars in the model
+  
+```{r}
+library(tabler)
 
-## Styles
+lm1 <- lm(mpg ~ wt, data = mtcars)
+lm2 <- lm(mpg ~ wt + cyl, data = mtcars)
 
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output:
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side.
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+tablify(lm1, lm2)
 ```
 
-You can enable figure captions by `fig_caption: yes` in YAML:
+If the user wants to manually manipulate the dataset of regression output:
 
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
-
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
-
-## More Examples
-
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
-
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
+```{r}
+start_table <- tablify(lm1, lm2)[[1]]
 ```
 
-Also a quote using `>`:
+In general, the internal R object output is meant to be intermediary, or used as a preview before exporting the table to share. Exporting is achieved by:
 
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+```{r, eval = F}
+library(WriteXLS)
+tablify(lm1, lm2, file = "myresults.csv")
+tablify(lm1, lm2, file = "myresults.xls")
+tablify(lm1, lm2, file = "myresults.xlsx")
+```
+
+Outputs to `xls` or `xlsx` formats requires the `WriteXLS` package.
+
+
+## Customizing Outputs
+
+The default output can be altered in several ways:
+
+- `teststat`: by default is `"p.value"`, but can also be `"std.error"` or `"statistic"`
+  - `"statistic"` will be a t-value or z-value and is model-dependent
+- `digits`: by default is 3, and specifies the number of decimal rounding places
+  - `digits_coef` and `digits_teststat` take on the `digits` value, unless they are explicitly specified. These allow more control over rounding coefficient vs. significance test outputs
+- `cutoffs`: by default `c(0.1, 0.05, 0.01)`, these specify the cutpoints at which significance markers are displayed. They must be presented in decreasing order, and any number are allowed.
+- `stars`: by default `c("*", "**", "***")`, this list must be the same length as `cutoffs` and again in order of weakest significance to strongest significance
+- `intercept_last`: by default `TRUE`, moves the intercept output to the bottom of the table (but before observation count and model fit statistics). If `FALSE`, reports it first.
+- `N`: by default `TRUE`, adds a row to the table displaying observation count
+- `fit`: by default `NULL`, can also be a string or list of fit statistics available in a regression output ("r.squared", "adj.r.squared")
+- `file`: by deafult `NULL`, specifies the output file name and path if desired
+
+```{r}
+lm3 <- lm(mpg ~ cyl + disp + hp + drat + wt + qsec + vs, data = mtcars)
+tablify(lm3)
+tablify(lm3, cutoffs = c(0.2, 0.1, 0.05))
+
+# error:
+# tablify(lm3, cutoffs = c(0.9, 0.7, 0.5, 0.3, 0.1))
+
+# correct - must supply enugh significance denoters
+tablify(lm3, cutoffs = c(0.9, 0.7, 0.5, 0.3, 0.1), 
+        stars = c('?', '+', '*', '**', '***'))
+
+tablify(lm1, lm2, lm3, fit = c("r.squared", "adj.r.squared"))
+```
+
+## Final note on model types
+
+Since this package relies on
+[`broom`](https://cran.r-project.org/web/packages/broom/index.html) to tidy
+model outputs into the columns for tables, it is currently limited to model
+types handled by broom. For the latest list, [see the developer's
+site](https://github.com/dgrtwo/broom#available-tidiers). Most frequently-used
+models should be ready to go, though.
+
+Models of different types (i.e. OLS and ordinal / binary logit) can be combined
+into one table, so long as the requested outputs are common between all of them.
+For example, requesting coefficients and their p-values will work, but
+requesting $R^2$ will fail, as ordinal models do not include this in their
+outputs.
