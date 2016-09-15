@@ -10,7 +10,7 @@
 #'
 
 convert_to_data <- function(model,
-                            teststat = 'std.error',
+                            teststat = 'p.value',
                             digits = 3,
                             digits_coef = digits,
                             digits_teststat = digits,
@@ -34,10 +34,11 @@ convert_to_data <- function(model,
   cleaned <- broom::tidy(model)
 
   # assign stars based on cutoffs
+  cleaned$displayed_stars <- ''
   for (i in 1:length(cutoffs)) {
     cleaned <-
       dplyr::mutate(cleaned,
-        displayed_stars = ifelse(p.value < cutoffs[i], stars[i], '')
+        displayed_stars = ifelse(p.value < cutoffs[i], stars[i], displayed_stars)
       )
   }
   cleaned <-
