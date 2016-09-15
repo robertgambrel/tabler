@@ -3,7 +3,7 @@
 #' This takes each model used in the final table and converts it to a tidy
 #' dataset, formatted and ready to be merged with others in a nice table.
 #'
-#' @inheritParams esttab
+#' @inheritParams tablify
 #' @param model A single model result
 #'
 #' @importFrom magrittr %>%

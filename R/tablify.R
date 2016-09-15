@@ -23,7 +23,7 @@
 
 
 
-esttab <- function(...,
+tablify <- function(...,
                    teststat = 'p.value',
                    digits = 3,
                    digits_coef = digits,
