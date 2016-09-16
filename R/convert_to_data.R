@@ -9,6 +9,11 @@
 #' @importFrom magrittr %>%
 #'
 
+if(getRversion() >= "2.15.1")  {utils::globalVariables(c("Variable"))}
+
+
+
+
 convert_to_data <- function(model,
                             teststat = 'p.value',
                             digits = 3,
@@ -18,6 +23,7 @@ convert_to_data <- function(model,
                             stars = c('*', '**', '***'),
                             N = T,
                             fit = NULL) {
+
 
   if (length(stars) != length(cutoffs)) {
     stop("Cutoff values for significance and significance signifiers (stars)
@@ -36,14 +42,17 @@ convert_to_data <- function(model,
   # assign stars based on cutoffs
   cleaned$displayed_stars <- ''
   for (i in 1:length(cutoffs)) {
-    cleaned <-
-      dplyr::mutate(cleaned,
-        displayed_stars = ifelse(p.value < cutoffs[i], stars[i], displayed_stars)
-      )
+    cleaned <- within(cleaned,
+                      displayed_stars <- ifelse(cleaned$p.value < cutoffs[i],
+                                                stars[i],
+                                                displayed_stars))
   }
-  cleaned <-
-    dplyr::mutate(cleaned,
-      displayed_estimate = paste0(round(estimate, digits_coef), displayed_stars)
+
+  # displayed_estimate = round(estimate)***
+  cleaned <- cleaned %>%
+    dplyr::mutate_(
+      displayed_estimate = lazyeval::interp(~paste0(round(x, digits_coef), displayed_stars),
+                                            x = as.name('estimate'))
     )
 
   # add test statistic, requires standard evaluation from dplyr
@@ -65,9 +74,9 @@ convert_to_data <- function(model,
 
   # convert to long form for merging
   cleaned_long <- cleaned %>%
-    dplyr::select(term, displayed_estimate, displayed_stat) %>%
-    tidyr::gather(type, value, 2:3) %>%
-    dplyr::arrange(term, type)
+    dplyr::select_(~term, ~displayed_estimate, ~displayed_stat) %>%
+    tidyr::gather_("type", "value", c("displayed_estimate", "displayed_stat")) %>%
+    dplyr::arrange_(~term, ~type)
 
   # add number of observations if desired
   if (N) {

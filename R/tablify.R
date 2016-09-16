@@ -58,21 +58,23 @@ tablify <- function(...,
 
   names(base) <- c("Variable", "Result", paste0("Model ", 1:(length(names(base))-2)))
 
-  base <- base %>%
-    dplyr::mutate(
-      Result = ifelse(Result == "displayed_estimate", "Coefficient", Result),
-      Result = ifelse(Result == "displayed_stat", teststat, Result)
-    )
+  base <- within(base, {
+                 Result <- ifelse(Result == "displayed_estimate", "Coefficient", Result)
+                 Result <- ifelse(Result == "displayed_stat", teststat, Result)
+                })
+
+
+
 
   # if there were any overall fit stats (r-squared etc.) move them to the bottom
   if (!is.null(fit)) {
     base_nonfit <- base %>%
-      dplyr::filter(
-        !Variable %in% fit
+      dplyr::filter_(
+        lazyeval::interp(~! x %in% fit, x = as.name("Variable"))
       )
     base_fit <- base %>%
-      dplyr::filter(
-        Variable %in% fit
+      dplyr::filter_(
+        lazyeval::interp(~x %in% fit, x = as.name("Variable"))
       )
     base <- rbind(base_nonfit, base_fit)
   }
@@ -84,18 +86,25 @@ tablify <- function(...,
     # if N was reported, move that last
     if (N) {
       base_1 <- base %>%
-        dplyr::filter(Variable != "N")
+        dplyr::filter_(
+          lazyeval::interp(~x != "N", x = as.name("Variable"))
+        )
       base_2 <- base %>%
-        dplyr::filter(Variable == "N")
-      base <- rbind(base_1, base_2)
+        dplyr::filter_(
+          lazyeval::interp(~x == "N", x = as.name("Variable"))
+        )
     }
     # if fit stat was requested
     if (!is.null(fit)) {
       for (stat in fit) {
         base_3 <- base %>%
-          dplyr::filter(Variable != stat)
+          dplyr::filter_(
+            lazyeval::interp(~x != stat, x = as.name("Variable"))
+          )
         base_4 <- base %>%
-          dplyr::filter(Variable == stat)
+          dplyr::filter_(
+            lazyeval::interp(~x == stat, x = as.name("Variable"))
+          )
         base <- rbind(base_3, base_4)
       }
     }
